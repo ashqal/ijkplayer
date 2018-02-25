@@ -46,10 +46,10 @@ struct SDL_VoutOverlay_Opaque {
 }
 
 - (void) display: (SDL_VoutOverlay *) overlay{
-    
+
     if ([self.callback respondsToSelector:@selector(onFrameAvailable:)]) {
         MDVideoFrame* frame = malloc(sizeof(MDVideoFrame));
-        
+
         frame -> w = overlay->w;
         frame -> h = overlay->h;
         frame -> format = overlay->format;
@@ -57,28 +57,28 @@ struct SDL_VoutOverlay_Opaque {
         frame -> pitches = overlay->pitches;
         frame -> pixels = overlay->pixels;
         frame ->buffer = NULL;
-        if (overlay->opaque != NULL && overlay->opaque->pixel_buffer != NULL) {
+        if (frame->format == SDL_FCC__VTB && overlay->opaque != NULL && overlay->opaque->pixel_buffer != NULL) {
             frame->buffer = ((SDL_VoutOverlay_Opaque*)overlay->opaque)->pixel_buffer;
             CVBufferRetain(frame->buffer);
         }
 
         [self.callback onFrameAvailable:(frame)];
-        
+
         if (frame ->buffer != NULL) {
             CVBufferRelease(frame->buffer);
         }
         free(frame);
-       
-        
+
+
     }
-    
+
     [self countFps];
 #ifdef MDFPS
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.label setText:[NSString stringWithFormat:@"fps:%f",self.fps]];
     });
 #endif
-    
+
 }
 
 - (void) countFps{
@@ -101,7 +101,7 @@ struct SDL_VoutOverlay_Opaque {
 
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key{
     // nop
-    
+
 }
 
 - (void) setFrameCallback:(id<MDVideoFrameCallback>) callback{
